@@ -5,12 +5,6 @@ on:
     branches: [ "**" ]
   pull_request:
     branches: [ "**" ]
-  workflow_dispatch:  # Allows manual triggering
-    inputs:
-      force_clear_cache:
-        description: "Set to true to clear the Gradle cache"
-        required: false
-        default: "false"
 
 jobs:
   build:
@@ -32,7 +26,7 @@ jobs:
       - name: Grant execute permission for Gradlew
         run: chmod +x ./gradlew
 
-      # Step 4: Cache Gradle dependencies (only for non-main branches)
+      # Step 4: Conditionally cache Gradle dependencies (non-main branches only)
       - name: Cache Gradle dependencies
         if: github.ref_name != 'main'  # Only cache for branches other than 'main'
         uses: actions/cache@v3
@@ -42,15 +36,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-${{ github.ref_name }}-
 
-      # Step 5: Force clear cache if requested
-      - name: Force clear cache
-        if: github.ref_name != 'main' && github.event.inputs.force_clear_cache == 'true'
-        run: rm -rf ~/.gradle/caches
-
-      # Step 6: Build the project
+      # Step 5: Build the project
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
 
-      # Step 7: Run tests
+      # Step 6: Run tests
       - name: Run tests
         run: ./gradlew test --no-daemon
