@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: Build and Test
 
 on:
   push:
@@ -26,19 +26,25 @@ jobs:
       - name: Grant execute permission for Gradlew
         run: chmod +x ./gradlew
 
-      # Step 4: Cache Gradle dependencies
+      # Step 4: Cache Gradle dependencies (only for non-main branches)
       - name: Cache Gradle dependencies
+        if: github.ref_name != 'main'  # Only cache for branches other than 'main'
         uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ github.ref_name }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-gradle-${{ github.ref_name }}-
 
-      # Step 5: Build the project
+      # Step 5: Force clear cache if requested
+      - name: Force clear cache
+        if: github.ref_name != 'main' && github.event.inputs.force_clear_cache == 'true'
+        run: rm -rf ~/.gradle/caches
+
+      # Step 6: Build the project
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
 
-      # Step 6: Run tests
+      # Step 7: Run tests
       - name: Run tests
         run: ./gradlew test --no-daemon
