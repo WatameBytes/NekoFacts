@@ -5,6 +5,12 @@ on:
     branches: [ "**" ]
   pull_request:
     branches: [ "**" ]
+  workflow_dispatch:  # Allows manual triggering
+    inputs:
+      force_clear_cache:
+        description: "Set to true to clear the Gradle cache"
+        required: false
+        default: "false"
 
 jobs:
   build:
