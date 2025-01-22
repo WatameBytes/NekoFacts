@@ -1,5 +1,7 @@
 # NekoFacts API
 
+[![Build and Test](https://github.com/WatameBytes/NekoFacts/actions/workflows/build.yml/badge.svg)](https://github.com/WatameBytes/NekoFacts/actions/workflows/build.yml)
+
 NekoFacts API is a Spring Boot application that integrates with the Nekos API to retrieve random anime images and random image files. This project provides REST endpoints for easy interaction with the Nekos API.
 
 ---
