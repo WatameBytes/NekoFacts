@@ -1,10 +1,17 @@
 # Stage 1: Build
-FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM eclipse-temurin:23-jdk AS builder
 
 # Set the working directory inside the builder container
 WORKDIR /app
 
-# Copy Gradle wrapper and configuration files to leverage Docker caching
+# Pre-install Gradle
+RUN apt-get update && apt-get install -y wget unzip \
+    && wget https://services.gradle.org/distributions/gradle-8.11.1-bin.zip \
+    && unzip gradle-8.11.1-bin.zip -d /opt/ \
+    && rm gradle-8.11.1-bin.zip \
+    && ln -s /opt/gradle-8.11.1/bin/gradle /usr/bin/gradle
+
+# Copy Gradle wrapper and configuration files
 COPY gradlew gradlew
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
@@ -15,14 +22,14 @@ RUN chmod +x ./gradlew
 # Pre-download dependencies to leverage Docker caching
 RUN ./gradlew dependencies --no-daemon
 
-# Copy the rest of the source code
+# Copy the source code
 COPY src src
 
 # Build the Spring Boot JAR file
 RUN ./gradlew bootJar --no-daemon
 
 # Stage 2: Run
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:23-jre
 
 # Set the working directory inside the container
 WORKDIR /app
